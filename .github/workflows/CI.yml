@@ -1,0 +1,41 @@
+name: Compile
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sm-version: [ '1.10', '1.11', '1.12' ]
+
+    name: "Build SM ${{ matrix.sm-version }}"
+    steps:
+      - name: Prepare env
+        shell: bash
+        run: echo "GITHUB_SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v3
+
+      - name: Setup SP
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: ${{ matrix.sm-version }}
+
+      - name: Run compiler
+        shell: bash
+        run: |
+          cd addons/sourcemod
+          mkdir plugins
+          for src in $(find scripting -maxdepth 1 -type f -name "*.sp");
+          do
+            spcomp $src -o=plugins/$(basename $src .sp)'.smx' -i=scripting/include -i=scripting -v2
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: store-${{ github.head_ref || github.ref_name }}-sm${{ matrix.sm-version }}-${{ env.GITHUB_SHA_SHORT }}
+          path: |
+            addons
+          retention-days: 14
