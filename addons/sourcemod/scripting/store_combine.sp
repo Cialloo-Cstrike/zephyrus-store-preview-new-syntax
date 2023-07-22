@@ -5,7 +5,7 @@
 #define PLUGIN_NAME "Store - The Resurrection with preview system"
 #define PLUGIN_AUTHOR "Zephyrus, nuclear silo, AiDN™"
 #define PLUGIN_DESCRIPTION "A completely new Store system with preview rewritten by nuclear silo"
-#define PLUGIN_VERSION "7.1.1"
+#define PLUGIN_VERSION "7.1.2"
 #define PLUGIN_URL ""
 
 #define SERVER_LOCK_IP ""
@@ -825,36 +825,7 @@ public void OnConfigsExecuted()
 	// If database has been connected. Skip connection and do some housekeeping here
 	else
 	{
-		char m_szQuery[256], m_szLogCleaningQuery[256];
-		// Remove expired and equipped items
-		Format(STRING(m_szQuery), "DELETE FROM store_items, store_equipment "
-								... "WHERE (store_items.unique_id = store_equipment.unique_id) "
-									... "AND store_items.date_of_expiration != 0 "
-									... "AND store_items.date_of_expiration < %d", GetTime());
-		SQL_TVoid(g_hDatabase, m_szQuery);
-		
-		// Remove expired and unequipped items
-		Format(STRING(m_szQuery), "DELETE FROM store_items WHERE date_of_expiration != 0 AND date_of_expiration < %d", GetTime());
-		SQL_TVoid(g_hDatabase, m_szQuery);
-		
-		char m_szDriver[2];
-		SQL_ReadDriver(g_hDatabase, STRING(m_szDriver));
-		
-		if (g_eCvars[g_cvarLogLast].aCache>0)
-		{
-			if(m_szDriver[0] == 'm')
-			{
-				Format(STRING(m_szLogCleaningQuery), "DELETE FROM store_plugin_logs WHERE `date` < CURDATE()-%i", g_eCvars[g_cvarLogLast].aCache);
-				SQL_TVoid(g_hDatabase, m_szLogCleaningQuery);
-				Format(STRING(m_szLogCleaningQuery), "DELETE FROM store_logs WHERE `date` < CURDATE()-%i", g_eCvars[g_cvarLogLast].aCache);
-				SQL_TVoid(g_hDatabase, m_szLogCleaningQuery);
-			}
-			else
-			{
-				Format(STRING(m_szLogCleaningQuery), "DELETE FROM store_plugin_logs WHERE `date` < (SELECT DATETIME('now', '-%i day'))", g_eCvars[g_cvarLogLast].aCache);
-				SQL_TVoid(g_hDatabase, m_szLogCleaningQuery);
-			}
-		}
+		Store_DB_HouseKeeping(g_hDatabase);
 	}
 	
 	if(g_eCvars[g_cvarDatabaseRetries].aCache > 0)
@@ -1863,6 +1834,7 @@ public int Store_ItemNameMenu_Handler(Menu hEdictMenu, MenuAction hAction, int c
 			
 			g_iMenuBack[client]=g_eItems[StringToInt(sSelected)].iParent;
 			g_iMenuClient[client]=client;
+			g_iMenuNum[client] = 1;
 
 			if(g_eItems[StringToInt(sSelected)].iHandler == g_iPackageHandler)
 				DisplayStoreMenu(client, g_iSelectedItem[client]);
@@ -1882,10 +1854,13 @@ public int Store_ItemNameMenu_Handler(Menu hEdictMenu, MenuAction hAction, int c
 				//	DisplayItemMenu(client, StringToInt(sSelected));
 				else 
 				{
-					//DisplayItemMenu(client, StringToInt(sSelected));
+					g_iSelectedPlan[client] = -1;
+					//DisplayStoreMenu(client, g_eItems[StringToInt(sSelected)].iParent);
 					char sTitle[128];
 					Format(sTitle, sizeof(sTitle), "%t", "Confirm_Buy", g_eItems[g_iSelectedItem[client]].szName, g_eTypeHandlers[g_eItems[g_iSelectedItem[client]].iHandler].szType);
 					Store_DisplayConfirmMenu(client, sTitle, MenuHandler_Store, 0);
+					
+					//CPrintToChatAll("This item is %s %s with itemid is %i and price is %i", g_eItems[g_iSelectedItem[client]].szName, g_eTypeHandlers[g_eItems[g_iSelectedItem[client]].iHandler].szType, g_iSelectedItem[client], g_eItems[g_iSelectedItem[client]].iPrice)
 				}
 			}
 		}
@@ -2770,9 +2745,9 @@ public int MenuHandler_Preview(Menu menu, MenuAction action, int client, int par
 			}
 			else
 			{
-				Store_BuyItem(client, g_iSelectedItem[client], itemid);
-				//BuyItem(client, itemid);
-				DisplayPreviewMenu(client, itemid);
+				Store_BuyItem(client, itemid);
+				//DisplayPreviewMenu(client, itemid);
+				DisplayItemMenu(client, itemid);
 			}
 		}
 		else if (strcmp(sId, "item_plan") == 0)
@@ -3556,40 +3531,7 @@ public void SQLCallback_Connect(Handle owner, Handle hndl, const char[] error, a
 		}
 		
 		// Do some housekeeping
-		char m_szQuery[256], m_szLogCleaningQuery[256];
-		// Remove expired and equipped items
-		Format(STRING(m_szQuery), "DELETE FROM store_items, store_equipment "
-								... "WHERE (store_items.unique_id = store_equipment.unique_id) "
-									... "AND store_items.date_of_expiration != 0 "
-									... "AND store_items.date_of_expiration < %d", GetTime());
-		SQL_TVoid(g_hDatabase, m_szQuery);
-		
-		// Remove expired and unequipped items
-		Format(STRING(m_szQuery), "DELETE FROM store_items WHERE date_of_expiration != 0 AND date_of_expiration < %d", GetTime());
-		SQL_TVoid(g_hDatabase, m_szQuery);
-		
-		/*Format(STRING(m_szVoucherQuery), "UPDATE store_voucher SET"
-									... " name_of_redeem = \"voucher's item expired\","
-									... " date_of_redeem = %d,"
-									... " steam_of_redeem = \"voucher's item expired\","
-									... " item_expiration = 0 "
-									... "WHERE item_expiration <> 0 AND item_expiration < %d", GetTime(), GetTime());
-		SQL_TVoid(g_hDatabase, m_szVoucherQuery);*/
-		if (g_eCvars[g_cvarLogLast].aCache>0)
-		{
-			if(m_szDriver[0] == 'm')
-			{
-				Format(STRING(m_szLogCleaningQuery), "DELETE FROM store_plugin_logs WHERE `date` < CURDATE()-%i", g_eCvars[g_cvarLogLast].aCache);
-				SQL_TVoid(g_hDatabase, m_szLogCleaningQuery);
-				Format(STRING(m_szLogCleaningQuery), "DELETE FROM store_logs WHERE `date` < CURDATE()-%i", g_eCvars[g_cvarLogLast].aCache);
-				SQL_TVoid(g_hDatabase, m_szLogCleaningQuery);
-			}
-			else
-			{
-				Format(STRING(m_szLogCleaningQuery), "DELETE FROM store_plugin_logs WHERE `date` < (SELECT DATETIME('now', '-%i day'))", g_eCvars[g_cvarLogLast].aCache);
-				SQL_TVoid(g_hDatabase, m_szLogCleaningQuery);
-			}
-		}
+		Store_DB_HouseKeeping(g_hDatabase);
 		
 		if(!SQL_SetCharset(g_hDatabase, "utf8mb4")){
 			SQL_SetCharset(g_hDatabase, "utf8");
@@ -4718,4 +4660,67 @@ public SMCResult Config_EndSection(Handle parser)
 
 public void Config_End(Handle parser, bool halted, bool failed) 
 {
+}
+
+void Store_DB_HouseKeeping(Handle db)
+{
+	// Do some housekeeping
+	char m_szQuery[600], m_szLogCleaningQuery[256];
+	
+	char m_szDriver[12];
+	SQL_ReadDriver(db, STRING(m_szDriver));
+	
+	// Remove expired and equipped items
+	if (StrEqual(m_szDriver, "mysql"))
+	{
+		// This query removes expired items that are equipped, and also remove the rows from store_equipment - it doesn't remove unequipped items!
+		Format(STRING(m_szQuery), "DELETE store_items, store_equipment "
+								... "FROM store_items, store_equipment "
+								... "WHERE store_items.unique_id = store_equipment.unique_id "
+									... "AND store_items.player_id = store_equipment.player_id "
+									... "AND store_items.date_of_expiration != 0 "
+									... "AND store_items.date_of_expiration < %d", GetTime());
+		// Ugly syntax, but MySQL DOES allow DELETE clauses between multiple tables in a single query
+	}
+	else
+	{
+		// This query removes rows from store_equipment that are linked to items that are expired, BUT DOESN'T ACTUALLY REMOVE EXPIRED ITEMS FROM PLAYERS INVENTORIES! - This is done by the query after this one.
+		// ^ NOTE THAT THE BEHAVIOR OF THIS QUERY DIFFERS FROM THE MySQL ONE!
+		// For easier copy-pasting: DELETE FROM store_equipment WHERE ROWID IN (SELECT store_equipment.ROWID FROM store_items, store_equipment WHERE store_items.unique_id = store_equipment.unique_id AND store_items.player_id = store_equipment.player_id AND store_items.date_of_expiration != 0 AND store_items.date_of_expiration < %d);
+		Format(STRING(m_szQuery), "DELETE FROM store_equipment "
+								... "WHERE ROWID IN "
+									... "("
+									...	"SELECT store_equipment.ROWID "
+										... "FROM store_items, store_equipment "
+										... "WHERE store_items.unique_id = store_equipment.unique_id "
+											... "AND store_items.player_id = store_equipment.player_id "
+											... "AND store_items.date_of_expiration != 0 "
+											... "AND store_items.date_of_expiration < %d"
+									... ") ", GetTime());
+		// SQLite doesn't allow DELETE clauses between multiple tables in a single query. GRRRR!!!
+		
+		// Btw, ROWID is the default hidden SQLite primary key, because the store_equipment table doesn't have one
+	}
+	SQL_TVoid(db, m_szQuery);
+	
+	// Remove expired and unequipped items
+	Format(STRING(m_szQuery), "DELETE FROM store_items WHERE date_of_expiration != 0 AND date_of_expiration < %d", GetTime());
+	SQL_TVoid(db, m_szQuery);
+	
+	
+	if (g_eCvars[g_cvarLogLast].aCache>0)
+	{
+		if (StrEqual(m_szDriver, "mysql"))
+		{
+			Format(STRING(m_szLogCleaningQuery), "DELETE FROM store_plugin_logs WHERE `date` < CURDATE()-%i", g_eCvars[g_cvarLogLast].aCache);
+			SQL_TVoid(db, m_szLogCleaningQuery);
+			Format(STRING(m_szLogCleaningQuery), "DELETE FROM store_logs WHERE `date` < CURDATE()-%i", g_eCvars[g_cvarLogLast].aCache);
+			SQL_TVoid(db, m_szLogCleaningQuery);
+		}
+		else
+		{
+			Format(STRING(m_szLogCleaningQuery), "DELETE FROM store_plugin_logs WHERE `date` < (SELECT DATETIME('now', '-%i day'))", g_eCvars[g_cvarLogLast].aCache);
+			SQL_TVoid(db, m_szLogCleaningQuery);
+		}
+	}
 }
