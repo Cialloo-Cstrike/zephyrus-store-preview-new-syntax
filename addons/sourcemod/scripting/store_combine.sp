@@ -284,16 +284,16 @@ public void OnPluginStart()
 	AutoExecConfig_SetCreateFile(true);
 
 	// Register ConVars
-	g_cvarDatabaseEntry = RegisterConVar("sm_store_database", "storage-local", "Name of the default store database entry", TYPE_STRING);
+	g_cvarDatabaseEntry = RegisterConVar("sm_store_database", "store", "Name of the default store database entry", TYPE_STRING);
 	g_cvarDatabaseRetries = RegisterConVar("sm_store_database_retries", "4", "Number of retries if the connection fails to estabilish with timeout", TYPE_INT);
 	g_cvarDatabaseTimeout = RegisterConVar("sm_store_database_timeout", "10", "Timeout in seconds to wait for database connection before retry", TYPE_FLOAT);
 	g_cvarItemSource = RegisterConVar("sm_store_item_source", "flatfile", "Source of the item list, can be set to flatfile and database, sm_store_items_table must be set if database is chosen (THIS IS HIGHLY EXPERIMENTAL AND MAY NOT WORK YET)", TYPE_STRING);
 	g_cvarItemsTable = RegisterConVar("sm_store_items_table", "store_menu", "Name of the items table", TYPE_STRING);
 	g_cvarStartCredits = RegisterConVar("sm_store_startcredits", "0", "Number of credits a client starts with", TYPE_INT);
-	g_cvarCreditTimer = RegisterConVar("sm_store_credit_interval", "60", "Interval in seconds to give out credits", TYPE_FLOAT, ConVar_CreditTimer);
+	g_cvarCreditTimer = RegisterConVar("sm_store_credit_interval", "800", "Interval in seconds to give out credits", TYPE_FLOAT, ConVar_CreditTimer);
 	g_cvarCreditAmountActive = RegisterConVar("sm_store_credit_amount_active", "1", "Number of credits to give out for active players", TYPE_INT, ConVar_CreditTimer);
 	g_cvarCreditAmountInactive = RegisterConVar("sm_store_credit_amount_inactive", "1", "Number of credits to give out for inactive players (spectators)", TYPE_INT, ConVar_CreditTimer);
-	g_cvarCreditAmountKill = RegisterConVar("sm_store_credit_amount_kill", "1", "Number of credits to give out for killing a player", TYPE_INT, ConVar_CreditTimer);
+	g_cvarCreditAmountKill = RegisterConVar("sm_store_credit_amount_kill", "0", "Number of credits to give out for killing a player", TYPE_INT, ConVar_CreditTimer);
 	g_cvarRequiredFlag = RegisterConVar("sm_store_required_flag", "", "Flag to access the !store menu", TYPE_FLAG);
 	g_cvarVIPFlag = RegisterConVar("sm_store_vip_flag", "", "Flag for VIP access (all items unlocked). Leave blank to disable.", TYPE_FLAG);
 	g_cvarAdminFlag = RegisterConVar("sm_store_admin_flag", "z", "Flag for admin access. Leave blank to disable.", TYPE_FLAG);
@@ -304,7 +304,7 @@ public void OnPluginStart()
 	g_cvarConfirmation = RegisterConVar("sm_store_confirmation_windows", "1", "Enable/disable confirmation windows.", TYPE_INT);
 	g_cvarPreview = RegisterConVar("sm_store_preview_enable", "1", "Enable/disable preview button.", TYPE_INT);
 	g_cvarSaveOnDeath = RegisterConVar("sm_store_save_on_death", "0", "Enable/disable client data saving on client death.", TYPE_INT);
-	g_cvarCreditMessages = RegisterConVar("sm_store_credit_messages", "1", "Enable/disable messages when a player earns credits.", TYPE_INT);
+	g_cvarCreditMessages = RegisterConVar("sm_store_credit_messages", "0", "Enable/disable messages when a player earns credits.", TYPE_INT);
 	g_cvarSellRestricted = RegisterConVar("sm_store_sell_restricted", "0", "Enable/disable auto-selling restricted items if players don't have access to them anymore.", TYPE_INT);
 	
 	//g_cvarChatTag = RegisterConVar("sm_store_chat_tag", "[Store] ", "The chat tag to use for displaying messages.", TYPE_STRING);
