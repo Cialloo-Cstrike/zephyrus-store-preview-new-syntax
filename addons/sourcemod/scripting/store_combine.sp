@@ -290,7 +290,7 @@ public void OnPluginStart()
 	g_cvarItemSource = RegisterConVar("sm_store_item_source", "flatfile", "Source of the item list, can be set to flatfile and database, sm_store_items_table must be set if database is chosen (THIS IS HIGHLY EXPERIMENTAL AND MAY NOT WORK YET)", TYPE_STRING);
 	g_cvarItemsTable = RegisterConVar("sm_store_items_table", "store_menu", "Name of the items table", TYPE_STRING);
 	g_cvarStartCredits = RegisterConVar("sm_store_startcredits", "0", "Number of credits a client starts with", TYPE_INT);
-	g_cvarCreditTimer = RegisterConVar("sm_store_credit_interval", "800", "Interval in seconds to give out credits", TYPE_FLOAT, ConVar_CreditTimer);
+	g_cvarCreditTimer = RegisterConVar("sm_store_credit_interval", "1600", "Interval in seconds to give out credits", TYPE_FLOAT, ConVar_CreditTimer);
 	g_cvarCreditAmountActive = RegisterConVar("sm_store_credit_amount_active", "1", "Number of credits to give out for active players", TYPE_INT, ConVar_CreditTimer);
 	g_cvarCreditAmountInactive = RegisterConVar("sm_store_credit_amount_inactive", "1", "Number of credits to give out for inactive players (spectators)", TYPE_INT, ConVar_CreditTimer);
 	g_cvarCreditAmountKill = RegisterConVar("sm_store_credit_amount_kill", "0", "Number of credits to give out for killing a player", TYPE_INT, ConVar_CreditTimer);
