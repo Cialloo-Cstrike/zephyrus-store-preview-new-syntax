@@ -314,7 +314,7 @@ public void OnPluginStart()
 	g_cvarShowSTEAM = RegisterConVar("sm_store_show_steam_items", "0", "If you enable this STEAM items will be shown in grey.", TYPE_INT);
 	g_cvarShowVIP = RegisterConVar("sm_store_show_vip_items", "0", "If you enable this VIP items will be shown in grey.", TYPE_INT);
 	g_cvarLogging = RegisterConVar("sm_store_logging", "0", "Set this to 1 for file logging and 2 to SQL logging (only MySQL). Leaving on 0 means disabled.", TYPE_INT);
-	g_cvarLogLast = RegisterConVar("sm_store_log_last", "7", "How many day to delete data log since the log created in database. Leaving on 0 means no delete.", TYPE_INT);
+	g_cvarLogLast = RegisterConVar("sm_store_log_last", "0", "How many day to delete data log since the log created in database. Leaving on 0 means no delete.", TYPE_INT);
 	
 	g_cvarPluginsLogging = RegisterConVar("sm_store_plugins_logging", "2", "Enable Logging for module . 0 = disable, 1 = file log, 2 = SQL log (MySQL only)", TYPE_INT);																																								 
 	g_cvarSilent = RegisterConVar("sm_store_silent_givecredits", "0", "Controls the give credits message visibility. 0 = public 1 = private 2 = no message", TYPE_INT);
